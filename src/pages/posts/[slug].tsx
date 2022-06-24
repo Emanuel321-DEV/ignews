@@ -42,45 +42,48 @@ export default function Posts({ post }: PostProps) {
 
 
 export const getServerSideProps: GetServerSideProps = async ({req, params}) => {
-    const session = await getSession({ req }); // Passando req, é verificado se o usuario está ou não logado
 
-    const { slug } = params; // Temos aqui acesso ao slug do post que queremos carregar
+        const session = await getSession({ req }); // Passando req, é verificado se o usuario está ou não logado
+
+        const { slug } = params; // Temos aqui acesso ao slug do post que queremos carregar
 
 
-    if(!session.activeSubscription){
-
-        return {
-            redirect: {
-                destination: '/',
-                permanent: false,
+        if(!session.activeSubscription){
+            return {
+                redirect: {
+                    destination: '/',
+                    permanent: false,
+                }
             }
         }
-    }
 
-    const prismic = getPrismicClient(req); // Buscando o ciente do prismic             
-
-
-    const response = await prismic.getByUID<any>('post', String(slug), {});
+        const prismic = getPrismicClient(req); // Buscando o ciente do prismic             
 
 
-    const post = { 
-        slug, 
-        title: RichText.asText(response.data.title),
-        content: RichText.asHtml(response.data.content),
-        updatedAt: new Date(response.last_publication_date).toLocaleDateString('pt-br', { 
-            day: '2-digit',
-            month: 'long',
-            year: 'numeric'
-        })
-    }
+        const response = await prismic.getByUID<any>('posts', String(slug), {});
 
 
-
-    return {
-        props: {
-            post 
+        const post = { 
+            slug, 
+            title: RichText.asText(response.data.title),
+            content: RichText.asHtml(response.data.content),
+            updatedAt: new Date(response.last_publication_date).toLocaleDateString('pt-br', { 
+                day: '2-digit',
+                month: 'long',
+                year: 'numeric'
+            })
         }
-    }
+
+
+
+        return {
+            props: {
+                post 
+            }
+        }
+
+    
+    
 
     
 }

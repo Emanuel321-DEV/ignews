@@ -11,84 +11,60 @@ export default NextAuth({
       clientId: process.env.GITHUB_ID,
       clientSecret: process.env.GITHUB_SECRET,
       authorization: {
+        // Info que eu vou querer do usuario
         params: {
           scope: "read:user"
         }
       },
     }),
   ],
+  
+  callbacks: {// Funcoes q sao executadas automaticamente assim que alguma ação é feita. Quando o user faz login por exemplo
 
-  callbacks: {
-      async session({session}){
+      async signIn({user, account, profile}){
+
+        const { email } = user;
 
         try{
-                      const userActiveSubscription = await fauna.query(
-                      q.Get(
-                          q.Intersection([ // Ideia de interseção da matematica
-                            q.Match(
-                              q.Index('subscription_by_user_ref'),
-                              q.Select(              
-                                "ref",        
-                                q.Get(       
-                                  q.Match(          
-                                    q.Index('user_by_email'),
-                                    q.Casefold(session.user.email)
-                                  )
-                                )
-                              )
-                            ),
-                            q.Match(
-                              q.Index('subscription_by_status'),
-                              'active'
-                            )
-                          ])
-                      )
-                      )
-                    
-                      return {
-                        ...session,
-                        activeSubscription: userActiveSubscription
-                      }
-        }catch (err){
-          return {
-            ...session,
-            activeSubscription: null
-          }
-        }
 
-        
-
-      }, 
-      async signIn({ user, account, profile} ) {     
-        try{
-          const { email } =  user;    
-
-              await fauna.query(
-               q.If( 
-                 q.Not(  
-                  q.Exists(q.Match(q.Index("user_by_email"), q.Casefold(email)))
-                  ),
-                  q.Create( 
-                    q.Collection('users'), 
-                    { data: { email } }                       
-                  ), // abaixo teriamos algo equivalente ao else
-                  q.Get( 
-                    q.Match(
-                      q.Index('user_by_email'), 
-                      q.Casefold(user.email)
-                    )
+          // inserção um usuario no banco          
+          await fauna.query(
+            q.If( // se
+              q.Not( // nao
+                q.Exists( // existe
+                  q.Match(  // onde
+                    q.Index("user_by_email"), // email de usuario
+                    q.Casefold(email) // email 
                   )
                 )
-                
+              ),
+              // entao
+              q.Create(
+                q.Collection('users'),
+                { data : { email }}
+              ),
+              // se existe 
+              q.Get(
+                q.Match(
+                  q.Index("user_by_email"),// P buscar informações no fauna deve ser usado index
+                  q.Casefold(email)
+                )
               )
-          
-              return true;
+            ),
+            
+          )
+
+          return true;
+        
+        }catch(err){
+          return false;
         }
-        catch(err){
-          console.log("ESSE EH O ERRO", err);
-          console.log("ERRO ESTA ACIMA")
-          return false
-        }
-      },
+        
+
+
+        
+        
+
+      }
   }
 })

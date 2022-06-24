@@ -19,6 +19,8 @@ interface PostsProps {
 }
 
 export default function Posts({posts }: PostsProps){ // posts: retornado da funcao getSaticProps
+    
+
     return( 
         <>
             <Head>
@@ -49,15 +51,16 @@ export default function Posts({posts }: PostsProps){ // posts: retornado da func
 export const getStaticProps: GetStaticProps = async () => {
     const prismic = getPrismicClient();
 
+    console.log('prismic ehh \n\n', prismic)
+
     // Faz uma buscar no prismic, em que o tipo do documento é publication. predicates é como se fosse um where do banco de dados
     const response = await prismic.query<any>([
-        Prismic.predicates.at('document.type', 'post')
+        Prismic.predicates.at('document.type', 'posts')
     ], {
-        fetch: ['post.title', 'post.content'], // Quais informações eu quero buscar
+        fetch: ['posts.title', 'posts.content'], // Quais informações eu quero buscar
         pageSize: 100,                         // Quantos post serão trazidos
     }
     )
-
 
     const posts = response.results.map(post =>{
         return {
@@ -71,6 +74,9 @@ export const getStaticProps: GetStaticProps = async () => {
             }) // converte a ultima data de publicação
         }
     } )
+
+
+    console.log('RESPONSE ehh \n\n\n\n\n\n\n\n\n\n\n\n\n', posts)
 
     return { 
         props: {

@@ -1,6 +1,4 @@
 import { SigninButton } from "../SigninButton";
-import teste from '/images/logo.svg'
-
 import style from "./styles.module.scss";
 import { ActiveLink } from "../ActiveLink";
 
