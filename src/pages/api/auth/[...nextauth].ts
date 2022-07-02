@@ -20,8 +20,49 @@ export default NextAuth({
   ],
   
   callbacks: {// Funcoes q sao executadas automaticamente assim que alguma ação é feita. Quando o user faz login por exemplo
+    async session({ session }){
+      
+      try { 
+        const userHasActiveSubscription = await fauna.query(
+          q.Get(
+            q.Intersection([
+              q.Match(
+                q.Index('subscription_by_user_ref'), 
+                q.Select(
+                  "ref",
+                  q.Get(
+                    q.Match(
+                      q.Index('user_by_email'),
+                      q.Casefold(session.user.email)
+                    )
+                  )
+                )
+              ),
+              q.Match(
+                q.Index('subscription_by_status'), 
+                "active"
+              )
+            ])
+          )
+        )
 
-      async signIn({user, account, profile}){
+        
+  
+        return {
+          ...session,
+          activeSubscription: userHasActiveSubscription
+        };
+      } catch (err) {
+        
+        return {
+          ...session,
+          activeSubscription: false
+        }
+      }
+      
+      
+    },
+    async signIn({user, account, profile}){
 
         const { email } = user;
 
@@ -65,6 +106,6 @@ export default NextAuth({
         
         
 
-      }
+    }
   }
 })

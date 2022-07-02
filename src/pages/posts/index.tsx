@@ -7,10 +7,10 @@ import { RichText } from 'prismic-dom' // Essa biblioteca converte o conteudo do
 
 import Link from 'next/link';
 
-type Post = {
+export type Post = {
     slug: string;
     title: string;
-    excertp: string;
+    excerpt: string;
     updatedAt: string
 }
 
@@ -18,7 +18,7 @@ interface PostsProps {
     posts: Post[];
 }
 
-export default function Posts({posts }: PostsProps){ // posts: retornado da funcao getSaticProps
+export default function Posts({ posts }: PostsProps){
     
 
     return( 
@@ -30,11 +30,14 @@ export default function Posts({posts }: PostsProps){ // posts: retornado da func
             <main className={styles.container}>
                 <div className={styles.posts}>
                     {posts.map(post => (
-                        <Link key={post.slug} href={`/posts/${post.slug}`}>
+                        <Link 
+                            key={post.slug} 
+                            href={`/posts/${post.slug}`}
+                        >
                             <a>
                                 <time>{post.updatedAt}</time>
                                 <strong>{post.title}</strong>
-                                <p>{post.excertp}</p>
+                                <p>{post.excerpt}</p>
                             </a>
                         </Link> 
 
@@ -51,21 +54,19 @@ export default function Posts({posts }: PostsProps){ // posts: retornado da func
 export const getStaticProps: GetStaticProps = async () => {
     const prismic = getPrismicClient();
 
-    console.log('prismic ehh \n\n', prismic)
-
-    // Faz uma buscar no prismic, em que o tipo do documento é publication. predicates é como se fosse um where do banco de dados
     const response = await prismic.query<any>([
-        Prismic.predicates.at('document.type', 'posts')
+        Prismic.predicates.at('document.type', 'uid')
     ], {
         fetch: ['posts.title', 'posts.content'], // Quais informações eu quero buscar
         pageSize: 100,                         // Quantos post serão trazidos
     }
     )
 
+
     const posts = response.results.map(post =>{
         return {
             slug: post.uid, // url de cada post
-            title: RichText.asText(post.data.title), // A lib 'prismic-dom', por mieo do metodo RichText, consegue converter essas informações p texto 
+            title: RichText.asText(post.data.title), // A lib 'prismic-dom', por meio do metodo RichText, consegue converter essas informações p texto 
             excerpt: post.data.content.find(content => content.type === 'paragraph')?.text ?? '', // procura um conteudo que seja do tipo paragrafo, se nao for, então ele retorna vazio
             updatedAt: new Date(post.last_publication_date).toLocaleDateString('pt-BR', {
                 day: '2-digit',
@@ -76,7 +77,6 @@ export const getStaticProps: GetStaticProps = async () => {
     } )
 
 
-    console.log('RESPONSE ehh \n\n\n\n\n\n\n\n\n\n\n\n\n', posts)
 
     return { 
         props: {

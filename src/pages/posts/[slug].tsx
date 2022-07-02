@@ -38,30 +38,26 @@ export default function Posts({ post }: PostProps) {
     )
 }
 
-
-
-
 export const getServerSideProps: GetServerSideProps = async ({req, params}) => {
 
         const session = await getSession({ req }); // Passando req, é verificado se o usuario está ou não logado
-
         const { slug } = params; // Temos aqui acesso ao slug do post que queremos carregar
 
 
-        if(!session.activeSubscription){
+        if(!session?.activeSubscription){
             return {
                 redirect: {
-                    destination: '/',
+                    destination: `/posts/preview/${slug}`,
                     permanent: false,
                 }
             }
         }
 
-        const prismic = getPrismicClient(req); // Buscando o ciente do prismic             
+        const prismic = getPrismicClient(req); // Buscando o ciente do prismic      
+        
 
-
-        const response = await prismic.getByUID<any>('posts', String(slug), {});
-
+        const response = await prismic.getByUID<any>('uid', String(slug), {});
+        
 
         const post = { 
             slug, 
@@ -82,8 +78,5 @@ export const getServerSideProps: GetServerSideProps = async ({req, params}) => {
             }
         }
 
-    
-    
 
-    
 }

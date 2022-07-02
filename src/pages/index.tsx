@@ -1,6 +1,6 @@
 import Head from "next/head";
 import { GetStaticProps } from "next";
-import {stripe} from "../services/stripe";
+import { stripe } from "../services/stripe";
 
 import { SubscribeButton } from "../components/subscribeButton";
 import style from "./home.module.scss"
@@ -8,7 +8,7 @@ import style from "./home.module.scss"
 interface ProductProps{
   product: {
     priceId: string;
-    amount: number;
+    amount: string;
   }
 }
 
@@ -31,7 +31,7 @@ export default function Home({product} : ProductProps) {
                 <span>for {product.amount} month</span>
 
             </p>
-            <SubscribeButton priceId={product.priceId}/>
+            <SubscribeButton/>
         
         </section>        
         <img src="/images/avatar.svg" alt="Girl coding" />
