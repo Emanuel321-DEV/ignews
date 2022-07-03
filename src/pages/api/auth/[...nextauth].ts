@@ -62,7 +62,7 @@ export default NextAuth({
       
       
     },
-    async signIn({user, account, profile}){
+    async signIn({ user }){
 
         const { email } = user;
 
@@ -100,11 +100,6 @@ export default NextAuth({
         }catch(err){
           return false;
         }
-        
-
-
-        
-        
 
     }
   }
