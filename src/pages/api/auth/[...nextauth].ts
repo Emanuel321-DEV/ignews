@@ -13,12 +13,11 @@ export default NextAuth({
       authorization: {
         // Info que eu vou querer do usuario
         params: {
-          scope: "read:user"
+          scope: "read:user",
         }
       },
     }),
   ],
-  
   callbacks: {// Funcoes q sao executadas automaticamente assim que alguma ação é feita. Quando o user faz login por exemplo
     async session({ session }){
       
@@ -102,5 +101,6 @@ export default NextAuth({
         }
 
     }
-  }
+  },
+  secret: process.env.NEXTAUTH_SECRET
 })
